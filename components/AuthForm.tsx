@@ -6,10 +6,14 @@ import { BsGithub, BsGoogle } from 'react-icons/bs'
 import Input from './Input'
 import Button from './Button'
 import AuthSocialButton from './AuthSocialButton'
+import { toast } from 'react-hot-toast'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 type Variant = 'LOGIN' | 'REGISTER'
 
 export default function AuthForm() {
+	const router = useRouter()
 	const [variant, setVariant] = useState<Variant>('LOGIN')
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -37,16 +41,58 @@ export default function AuthForm() {
 		setIsLoading(true)
 
 		if (variant === 'REGISTER') {
-			axios.post('/api/register', data)
+			axios
+				.post('/api/register', data)
+				.then(() =>
+					signIn('credentials', {
+						...data,
+						redirect: false
+					})
+				)
+				.then(callback => {
+					if (callback?.error) {
+						toast.error('Invalid credentials!')
+					}
+
+					if (callback?.ok) {
+						router.push('/conversations')
+					}
+				})
+				.catch(() => toast.error('Something went wrong!'))
+				.finally(() => setIsLoading(false))
 		}
 
 		if (variant === 'LOGIN') {
-			// next Sign In
+			signIn('credentials', {
+				...data,
+				redirect: false
+			})
+				.then(callback => {
+					if (callback?.error) {
+						toast.error('Invalid credentials!')
+					}
+
+					if (callback?.ok) {
+						router.push('/conversations')
+					}
+				})
+				.finally(() => setIsLoading(false))
 		}
 	}
 
-	const socialAction = (action: string) => {
-		// NextAuth Social Sign In
+	const socialAction = (action: 'google' | 'github') => {
+		setIsLoading(true)
+		signIn(action, { redirect: false })
+			.then(callback => {
+				if (callback?.error) {
+					toast.error('Invalid Credentials')
+				}
+
+				if (callback?.ok && !callback?.error) {
+					toast.success('Logged In')
+				}
+			})
+			.finally(() => setIsLoading(false))
 	}
 
 	return (
