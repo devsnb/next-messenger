@@ -7,9 +7,9 @@ import { format } from 'date-fns'
 import { Dialog, Transition } from '@headlessui/react'
 import { IoClose, IoTrash } from 'react-icons/io5'
 import Avatar from './Avatar'
-import Modal from './Modal'
 import ConfirmModal from './ConfirmModal'
 import AvatarGroup from './AvatarGroup'
+import useActiveList from '@/hooks/useActiveList'
 
 type Props = {
 	data: Conversation & {
@@ -22,6 +22,8 @@ type Props = {
 export default function Header({ data, isOpen, onClose }: Props) {
 	const otherUser = useOtherUser(data)
 	const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
+	const { members } = useActiveList()
+	const isActive = members.indexOf(otherUser?.email!) !== -1
 
 	const joinedDate = useMemo(() => {
 		return format(new Date(otherUser.createdAt), 'PP')
@@ -36,8 +38,8 @@ export default function Header({ data, isOpen, onClose }: Props) {
 			return `${data.users.length} members`
 		}
 
-		return 'Active'
-	}, [data])
+		return isActive ? 'Active' : 'Offline'
+	}, [data, isActive])
 
 	return (
 		<>
