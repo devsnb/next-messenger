@@ -9,6 +9,7 @@ import { IoClose, IoTrash } from 'react-icons/io5'
 import Avatar from './Avatar'
 import Modal from './Modal'
 import ConfirmModal from './ConfirmModal'
+import AvatarGroup from './AvatarGroup'
 
 type Props = {
 	data: Conversation & {
@@ -40,8 +41,10 @@ export default function Header({ data, isOpen, onClose }: Props) {
 
 	return (
 		<>
-			<ConfirmModal isOpen={confirmOpen} onClose={() => setConfirmOpen(false)} />
-				
+			<ConfirmModal
+				isOpen={confirmOpen}
+				onClose={() => setConfirmOpen(false)}
+			/>
 
 			<Transition.Root show={isOpen} as={Fragment}>
 				<Dialog as='div' className='relative z-50' onClose={onClose}>
@@ -87,7 +90,11 @@ export default function Header({ data, isOpen, onClose }: Props) {
 											<div className='relative mt-6 flex-1 px-4 sm:px-6'>
 												<div className='flex flex-col items-center'>
 													<div className='mb-2'>
-														<Avatar user={otherUser} />
+														{data.isGroup ? (
+															<AvatarGroup users={data.users} />
+														) : (
+															<Avatar user={otherUser} />
+														)}
 													</div>
 													<div>{title}</div>
 													<div className='text-sm text-gray-500'>
@@ -108,9 +115,23 @@ export default function Header({ data, isOpen, onClose }: Props) {
 													</div>
 													<div className='w-full pb-5 pt-5 sm:px-0 sm:pt-0'>
 														<dl className='space-y-8 px-4 sm:space-y-6 sm:px-6'>
+															{data.isGroup && (
+																<div>
+																	<dt className='text-sm font-medium text-gray-500 sm:w-40 sm:flex-shrink-0'>
+																		Emails
+																	</dt>
+																	<dd className='mt-1 text-sm text-gray-900 sm:col-span-2'>
+																		{data.users
+																			.map(user => user.email)
+																			.join(', ')}
+																	</dd>
+																</div>
+															)}
 															{!data.isGroup && (
 																<div>
-																	<dt className='text-sm font-medium text-gray-500 sm:w-40 sm:flex-shrink-0'></dt>
+																	<dt className='text-sm font-medium text-gray-500 sm:w-40 sm:flex-shrink-0'>
+																		Email
+																	</dt>
 																	<dd className='mt-1 text-sm text-gray-900 sm:col-span-2'>
 																		{otherUser.email}
 																	</dd>

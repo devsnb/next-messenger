@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react'
 import Avatar from './Avatar'
 import { format } from 'date-fns'
 import Image from 'next/image'
+import { useState } from 'react'
+import ImageModal from './ImageModal'
 
 type Props = {
 	isLast?: boolean
@@ -12,6 +14,7 @@ type Props = {
 
 export default function MessageBox({ isLast, data }: Props) {
 	const session = useSession()
+	const [imageModalOpen, setImageModalOpen] = useState<boolean>(false)
 
 	const isOwn = session?.data?.user?.email === data?.sender?.email
 
@@ -37,8 +40,14 @@ export default function MessageBox({ isLast, data }: Props) {
 						data.image ? 'rounded-md p-0' : 'rounded-full py-2 px-3'
 					)}
 				>
+					<ImageModal
+						src={data.image}
+						isOpen={imageModalOpen}
+						onClose={() => setImageModalOpen(false)}
+					/>
 					{data.image ? (
 						<Image
+							onClick={() => setImageModalOpen(true)}
 							alt='image'
 							height={255}
 							width={255}
